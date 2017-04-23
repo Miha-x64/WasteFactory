@@ -6,3 +6,7 @@ how to separate waste, made in to days for
 * Graphics by Ksenia Kalisheva
 
 ![Screenshot](screenshot.png)
+
+Using:
+* [libgdx](https://github.com/libgdx/libgdx)
+* [Fabrica typeface](http://studiofaculty.com/archive/fabrica/)
