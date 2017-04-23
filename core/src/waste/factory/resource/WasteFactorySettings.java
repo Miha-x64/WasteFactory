@@ -24,7 +24,7 @@ public interface WasteFactorySettings {
     @ms int LEVEL_TIME = 90_000;
     @ms int WRONG_WASTE_PENALTY = 5_000;
 
-    int WASTE_ITEM_COUNT = 1;
+    int WASTE_ITEM_COUNT = 5;
 
     Interpolation SHAKE_INTERPOLATION = new Interpolation() {
         @Override public float apply(float a) {
