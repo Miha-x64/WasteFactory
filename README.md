@@ -8,5 +8,8 @@ how to separate waste, made in to days for
 ![Screenshot](screenshot.png)
 
 Using:
-* [libgdx](https://github.com/libgdx/libgdx)
-* [Fabrica typeface](http://studiofaculty.com/archive/fabrica/)
+* [libgdx library](https://github.com/libgdx/libgdx)
+* ['Fabrica' typeface](http://studiofaculty.com/archive/fabrica/)
+* Angelo Badalamenti — Caitlin's Theme
+* ['miu' iconset](https://www.iconfinder.com/iconsets/miu)
+* ['ecosystem' sound](http://aparkov.ru/event/ekosistema/)

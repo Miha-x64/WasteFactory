@@ -2,6 +2,7 @@ package waste.factory.screen.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -18,6 +19,8 @@ import waste.factory.object.Waste;
 import waste.factory.resource.WasteFactorySettings;
 
 import static java.lang.Math.max;
+import static waste.factory.resource.WasteFactorySettings.SCREEN_HEIGHT;
+import static waste.factory.resource.WasteFactorySettings.SCREEN_WIDTH;
 import static waste.factory.resource.WasteFactoryStrings.*;
 
 /**
@@ -38,7 +41,6 @@ public final class GameScreen extends ScreenAdapter {
     private final long startTime;
     private long penalty;
     private long lastPenaltyTime;
-    private boolean isReleased;
     private boolean win, lose;
     private final Overlay overlay;
 
@@ -49,10 +51,13 @@ public final class GameScreen extends ScreenAdapter {
     private final GlyphLayout levelSucceed;
     private final GlyphLayout levelOneMoreTime;
 
+    private final Sound winSound;
+
     public GameScreen(WasteFactoryGame game) {
         this.game = game;
         this.camera = new OrthographicCamera();
-        camera.setToOrtho(false, WasteFactorySettings.SCREEN_WIDTH, WasteFactorySettings.SCREEN_HEIGHT);
+        game.resumeMusic();
+        camera.setToOrtho(false, SCREEN_WIDTH, SCREEN_HEIGHT);
 
         backgroundTx = new Texture(Gdx.files.internal("gameBackground.png"));
         wasteHelper = new WasteHelper(camera);
@@ -76,6 +81,8 @@ public final class GameScreen extends ScreenAdapter {
 
         levelSucceed = new GlyphLayout(game.mediumFont, LEVEL_SUCCEED);
         levelOneMoreTime = new GlyphLayout(game.mediumFont, LEVEL_ONE_MORE_TIME);
+
+        winSound = Gdx.audio.newSound(Gdx.files.internal("win.ogg"));
     }
 
     @Override
@@ -109,7 +116,7 @@ public final class GameScreen extends ScreenAdapter {
             }
 
             game.mediumFont.draw(batch, String.format(
-                    SECONDS_LEFT_FORMAT, max(0, (timeLeft) / 1000)), 25, WasteFactorySettings.SCREEN_HEIGHT - 25);
+                    SECONDS_LEFT_FORMAT, max(0, (timeLeft) / 1000)), 25, SCREEN_HEIGHT - 25);
         }
 
         batch.end();
@@ -134,10 +141,10 @@ public final class GameScreen extends ScreenAdapter {
                 if (fade > .5f) {
                     batch.begin();
                     game.mediumFont.setColor(1, 1, 1, 1);
-                    Fonts.drawTextCenteredX(game.mediumFont, batch, levelSucceed, (WasteFactorySettings.SCREEN_HEIGHT + 1.5f * levelFailed.height) / 2);
+                    Fonts.drawTextCenteredX(game.mediumFont, batch, levelSucceed, (SCREEN_HEIGHT + 1.5f * levelFailed.height) / 2);
                     if (fade > .99f) {
                         Fonts.drawTextCenteredX(game.mediumFont, batch, levelOneMoreTime,
-                                (WasteFactorySettings.SCREEN_HEIGHT - 1.5f * levelRetry.height) / 2);
+                                (SCREEN_HEIGHT - 1.5f * levelRetry.height) / 2);
                     }
                     batch.end();
                 }
@@ -151,30 +158,29 @@ public final class GameScreen extends ScreenAdapter {
                     // overlay is fading in, draw text if necessary
                     batch.begin();
                     game.mediumFont.setColor(1, 1, 1, 1);
-                    Fonts.drawTextCenteredX(game.mediumFont, batch, levelFailed, (WasteFactorySettings.SCREEN_HEIGHT + 1.5f * levelFailed.height) / 2);
+                    Fonts.drawTextCenteredX(game.mediumFont, batch, levelFailed, (SCREEN_HEIGHT + 1.5f * levelFailed.height) / 2);
                     if (fade > .99f) {
-                        Fonts.drawTextCenteredX(game.mediumFont, batch, levelRetry, (WasteFactorySettings.SCREEN_HEIGHT - 1.5f * levelRetry.height) / 2);
+                        Fonts.drawTextCenteredX(game.mediumFont, batch, levelRetry, (SCREEN_HEIGHT - 1.5f * levelRetry.height) / 2);
                     }
                     batch.end();
                 }
             }
 
-            // restart level if released & touched
-            if (Gdx.input.isTouched()) {
-                if (isReleased) {
-                    game.setScreen(new GameScreen(game));
-                    dispose();
-                }
-            } else {
-                isReleased = true;
+            // restart level if
+            if (Gdx.input.justTouched()) {
+                game.setScreen(new GameScreen(game));
+                dispose();
             }
         }
     }
 
     private void checkWin() {
         if (wasteHelper.getAmountOf(Waste.Type.PAPER) == 0) {
+            game.pauseMusic();
             win = true;
+            winSound.play();
             overlay.fadeIn(Interpolation.circleOut, 0, 0, 0, .5f, true);
+            wasteHelper.disappear();
         }
     }
 
@@ -183,5 +189,6 @@ public final class GameScreen extends ScreenAdapter {
         backgroundTx.dispose();
         wasteHelper.dispose();
         paperContainerTx.dispose();
+        winSound.dispose();
     }
 }

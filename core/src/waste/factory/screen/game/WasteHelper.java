@@ -55,6 +55,8 @@ import static waste.factory.resource.WasteFactoryStrings.WRONG_WASTE_FORMAT;
     private final waste.factory.object.Container[] activeContainer;
     private final Waste[] activeItem;
 
+    private long disappearAt;
+
     /*pkg*/ WasteHelper(OrthographicCamera camera) {
         milkPackTx = new Texture(Gdx.files.internal("wasteMilkAseptic.png"));
         newspaperTx = new Texture(Gdx.files.internal("wasteNewspaper.png"));
@@ -156,6 +158,15 @@ import static waste.factory.resource.WasteFactoryStrings.WRONG_WASTE_FORMAT;
                 size--;
             }
         }
+
+        if (disappearAt != 0 && disappearAt <= now) { // disappear if necessary
+            Long Now = now;
+            for (int i = 0, size = waste.size; i < size; i++) {
+                dyingWaste.put(waste.get(i), Now);
+            }
+            waste.clear();
+            disappearAt = 0;
+        }
     }
 
     // null if no change,
@@ -188,6 +199,10 @@ import static waste.factory.resource.WasteFactoryStrings.WRONG_WASTE_FORMAT;
 
     /*pkg*/ int getAmountOf(Waste.Type type) {
         return wasteAmounts.get(type).value;
+    }
+
+    /*pkg*/ void disappear() {
+        disappearAt = TimeUtils.millis() + 1_000;
     }
 
     /*pkg*/ void dispose() {
